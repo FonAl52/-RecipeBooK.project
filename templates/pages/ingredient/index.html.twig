@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🌮 RecipeBook - Mes Ingrédients
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+{% if not ingredients.items is same as([]) %}
+<h1>Mes ingrédients</h1>
+
+{% for message in app.flashes('success') %}
+			<div class="alert alert-success mt-4">
+				{{ message }}
+			</div>
+{% endfor %}
+
+<a href="{{ path('ingredient.new') }}" class="btn btn-primary">
+				Créer un ingrédient
+</a>
+
+<div class="count mt-4">Il y a
+				{{ ingredients.getTotalItemCount }}
+				ingrédient(s)
+</div>
+
+<div class="row justify-content-center mt-4">
+  	{% for ingredient in ingredients %}
+    <div class="col-3">
+		<div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
+		<div class="card-header">{{ ingredient.id }}</div>
+		<div class="card-body">
+			<h4 class="card-title">{{ ingredient.name }}</h4>
+			<p class="card-text">{{ ingredient.price|number_format(2, '.', ',') }}
+			€</p>
+			<p class="card-text">{{ ingredient.createdAt|date('d/m/Y') }}
+			</p>
+			<a href="{{ path('ingredient.edit', {id: ingredient.id}) }}" role="button" class="btn btn-light">Modifier</a>
+			<a href="{{ path('ingredient.delete', {id: ingredient.id}) }}" role="button" class="btn btn-secondary">Supprimer</a>						
+		</div>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+
+
+<div class="navigation d-flex justify-content-center mt-4">
+				{{ knp_pagination_render(ingredients) }}
+</div>
+{% else %}
+			<h4>Il n'y a pas d'ingrédients</h4>
+
+			<a href="{{ path('ingredient.new') }}" class="btn btn-primary">
+				Créer un ingrédient
+			</a>
+		{% endif %}
+
+</div>
+{% endblock %}
