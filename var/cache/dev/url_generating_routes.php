@@ -21,4 +21,8 @@ return [
     'ingredient.new' => [[], ['_controller' => 'App\\Controller\\IngredientController::new'], [], [['text', '/ingredient/creation']], [], [], []],
     'ingredient.edit' => [['id'], ['_controller' => 'App\\Controller\\IngredientController::edit'], [], [['variable', '/', '[^/]++', 'id', true], ['text', '/ingredient/edition']], [], [], []],
     'ingredient.delete' => [['id'], ['_controller' => 'App\\Controller\\IngredientController::delete'], [], [['variable', '/', '[^/]++', 'id', true], ['text', '/ingredient/suppression']], [], [], []],
+    'recipe.index' => [[], ['_controller' => 'App\\Controller\\RecipeController::index'], [], [['text', '/recette']], [], [], []],
+    'recipe.new' => [[], ['_controller' => 'App\\Controller\\RecipeController::new'], [], [['text', '/recette/creation']], [], [], []],
+    'recipe.edit' => [['id'], ['_controller' => 'App\\Controller\\RecipeController::edit'], [], [['variable', '/', '[^/]++', 'id', true], ['text', '/recette/edition']], [], [], []],
+    'recipe.delete' => [['id'], ['_controller' => 'App\\Controller\\RecipeController::delete'], [], [['variable', '/', '[^/]++', 'id', true], ['text', '/recette/suppression']], [], [], []],
 ];
