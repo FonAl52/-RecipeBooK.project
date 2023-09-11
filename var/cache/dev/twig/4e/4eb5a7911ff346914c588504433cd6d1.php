@@ -32,6 +32,7 @@ class __TwigTemplate_28f7ad79975bb1f7af2baef176a35515 extends Template
             'javascripts' => [$this, 'block_javascripts'],
             'header' => [$this, 'block_header'],
             'body' => [$this, 'block_body'],
+            'footer' => [$this, 'block_footer'],
         ];
     }
 
@@ -67,16 +68,18 @@ class __TwigTemplate_28f7ad79975bb1f7af2baef176a35515 extends Template
         echo "    </head>
 
     <body>
-        ";
+\t\t";
         // line 21
         $this->displayBlock('header', $context, $blocks);
         // line 24
-        echo "
-        ";
-        // line 25
+        echo "\t\t";
         $this->displayBlock('body', $context, $blocks);
         // line 26
-        echo "    </body>
+        echo "        ";
+        $this->displayBlock('footer', $context, $blocks);
+        // line 29
+        echo "\t</body>
+
 </html>
 ";
         
@@ -178,7 +181,7 @@ class __TwigTemplate_28f7ad79975bb1f7af2baef176a35515 extends Template
 
     }
 
-    // line 25
+    // line 24
     public function block_body($context, array $blocks = [])
     {
         $macros = $this->macros;
@@ -188,6 +191,31 @@ class __TwigTemplate_28f7ad79975bb1f7af2baef176a35515 extends Template
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "body"));
 
+        // line 25
+        echo "        ";
+        
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->leave($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof);
+
+        
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->leave($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof);
+
+    }
+
+    // line 26
+    public function block_footer($context, array $blocks = [])
+    {
+        $macros = $this->macros;
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2 = $this->extensions["Symfony\\Bundle\\WebProfilerBundle\\Twig\\WebProfilerExtension"];
+        $__internal_5a27a8ba21ca79b61932376b2fa922d2->enter($__internal_5a27a8ba21ca79b61932376b2fa922d2_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "footer"));
+
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f = $this->extensions["Symfony\\Bridge\\Twig\\Extension\\ProfilerExtension"];
+        $__internal_6f47bbe9983af81f1e7450e9a3e3768f->enter($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof = new \Twig\Profiler\Profile($this->getTemplateName(), "block", "footer"));
+
+        // line 27
+        echo "\t\t\t";
+        $this->loadTemplate("partials/_footer.html.twig", "base.html.twig", 27)->display($context);
+        // line 28
+        echo "\t\t";
         
         $__internal_6f47bbe9983af81f1e7450e9a3e3768f->leave($__internal_6f47bbe9983af81f1e7450e9a3e3768f_prof);
 
@@ -203,7 +231,7 @@ class __TwigTemplate_28f7ad79975bb1f7af2baef176a35515 extends Template
 
     public function getDebugInfo()
     {
-        return array (  182 => 25,  172 => 23,  169 => 22,  159 => 21,  146 => 16,  136 => 15,  120 => 9,  110 => 8,  91 => 5,  79 => 26,  77 => 25,  74 => 24,  72 => 21,  67 => 18,  65 => 15,  62 => 14,  59 => 8,  54 => 5,  48 => 1,);
+        return array (  218 => 28,  215 => 27,  205 => 26,  195 => 25,  185 => 24,  175 => 23,  172 => 22,  162 => 21,  149 => 16,  139 => 15,  123 => 9,  113 => 8,  94 => 5,  81 => 29,  78 => 26,  75 => 24,  73 => 21,  68 => 18,  66 => 15,  63 => 14,  60 => 8,  55 => 5,  49 => 1,);
     }
 
     public function getSourceContext()
@@ -228,12 +256,16 @@ class __TwigTemplate_28f7ad79975bb1f7af2baef176a35515 extends Template
     </head>
 
     <body>
-        {% block header %}
+\t\t{% block header %}
 \t\t\t{% include \"partials/_header.html.twig\" %}
 \t\t{% endblock %}
+\t\t{% block body %}
+        {% endblock %}
+        {% block footer %}
+\t\t\t{% include \"partials/_footer.html.twig\" %}
+\t\t{% endblock %}
+\t</body>
 
-        {% block body %}{% endblock %}
-    </body>
 </html>
 ", "base.html.twig", "/Users/Shared/Openclassrooms/Projets PHP:Sf/RecipeBooK/templates/base.html.twig");
     }
