@@ -22,6 +22,7 @@ class RecipeController extends AbstractController
      * @param Request $request
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/recette', name: 'recipe.index', methods: ['GET'])]
     public function index(
         RecipeRepository $repository,
@@ -46,6 +47,7 @@ class RecipeController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/recette/creation', 'recipe.new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $manager):
     Response {
@@ -77,19 +79,18 @@ class RecipeController extends AbstractController
     /**
      * This controller allow us to edit a recipe
      *
-     * @param int $id
+     * @param Recipe $recipe
      * @param Request $request
      * @param EntityManagerInterface $manager
      * @return Response
      */
+    #[Security("is_granted('ROLE_USER') and user === recipe.getUser()")]
     #[Route('/recette/edition/{id}', 'recipe.edit', methods: ['GET', 'POST'])]
     public function edit(
-        RecipeRepository $repository,
-        int $id,
+        Recipe $recipe,
         Request $request,
         EntityManagerInterface $manager
     ): Response {
-        $recipe = $repository->findOneBy(["id" => $id]);
         $form = $this->createForm(RecipeType::class, $recipe);
         $form->handleRequest($request);
 
@@ -112,6 +113,7 @@ class RecipeController extends AbstractController
         ]);
     }
 
+
     /**
      * This controller allows us to delete a recipe
      *
@@ -120,6 +122,7 @@ class RecipeController extends AbstractController
      * @return Response
      */
     #[Route('/recette/suppression/{id}', 'recipe.delete', methods: ['GET'])]
+    #[Security("is_granted('ROLE_USER') and user === recipe.getUser()")]
     public function delete(
         RecipeRepository $repository,
         int $id,

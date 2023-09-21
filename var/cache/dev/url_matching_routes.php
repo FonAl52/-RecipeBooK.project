@@ -16,7 +16,7 @@ return [
         '/_profiler/open' => [[['_route' => '_profiler_open_file', '_controller' => 'web_profiler.controller.profiler::openAction'], null, null, null, false, false, null]],
         '/' => [[['_route' => 'home.index', '_controller' => 'App\\Controller\\HomeController::index'], null, ['GET' => 0], null, false, false, null]],
         '/ingredient' => [[['_route' => 'ingredient.index', '_controller' => 'App\\Controller\\IngredientController::index'], null, ['GET' => 0], null, false, false, null]],
-        '/ingredient/creation' => [[['_route' => 'ingredient.new', '_controller' => 'App\\Controller\\IngredientController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        '/ingredient/creation' => [[['_route' => 'ingredient.new', '_controller' => 'App\\Controller\\IngredientController::new'], null, null, null, false, false, null]],
         '/recette' => [[['_route' => 'recipe.index', '_controller' => 'App\\Controller\\RecipeController::index'], null, ['GET' => 0], null, false, false, null]],
         '/recette/creation' => [[['_route' => 'recipe.new', '_controller' => 'App\\Controller\\RecipeController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/connexion' => [[['_route' => 'security.login', '_controller' => 'App\\Controller\\SecurityController::login'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],

@@ -5,8 +5,8 @@ namespace App\Controller;
 use App\Entity\Ingredient;
 use App\Form\IngredientType;
 use App\Repository\IngredientRepository;
-use Knp\Component\Pager\PaginatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class IngredientController extends AbstractController
 {
     /**
-     * This function display all ingredients
+     * This controller display all ingredients
      *
      * @param IngredientRepository $repository
      * @param PaginatorInterface $paginator
@@ -23,13 +23,14 @@ class IngredientController extends AbstractController
      * @return Response
      */
     #[Route('/ingredient', name: 'ingredient.index', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function index(
         IngredientRepository $repository,
         PaginatorInterface $paginator,
         Request $request
     ): Response {
         $ingredients = $paginator->paginate(
-            $repository->findBy(['user'=>$this->getUser()]),
+            $repository->findBy(['user' => $this->getUser()]),
             $request->query->getInt('page', 1),
             10
         );
@@ -46,7 +47,8 @@ class IngredientController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
-    #[Route('/ingredient/creation', 'ingredient.new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    #[Route('/ingredient/creation', 'ingredient.new')]
     public function new(
         Request $request,
         EntityManagerInterface $manager
@@ -78,19 +80,18 @@ class IngredientController extends AbstractController
     /**
      * This controller allow us to edit an ingredient
      *
-     * @param int $id
+     * @param Ingredient $ingredient
      * @param Request $request
      * @param EntityManagerInterface $manager
      * @return Response
      */
+    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
     public function edit(
-        IngredientRepository $repository,
-        int $id,
+        Ingredient $ingredient,
         Request $request,
         EntityManagerInterface $manager
     ): Response {
-        $ingredient = $repository->findOneBy(["id" => $id]);
         $form = $this->createForm(IngredientType::class, $ingredient);
         $form->handleRequest($request);
 
@@ -113,67 +114,27 @@ class IngredientController extends AbstractController
         ]);
     }
 
-    // #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
-    // public function edit(
-    //     Ingredient $ingredient,
-    //     Request $request,
-    //     EntityManagerInterface $manager
-    // ): Response {
-    //     $form = $this->createForm(IngredientType::class, $ingredient);
-    //     $form->handleRequest($request);
-
-    //     if ($form->isSubmitted() && $form->isValid()) {
-    //         $ingredient = $form->getData();
-
-    //         $manager->persist($ingredient);
-    //         $manager->flush();
-
-    //         $this->addFlash(
-    //             'success',
-    //             'Votre ingrédient a été modifié avec succès !'
-    //         );
-
-    //         return $this->redirectToRoute('ingredient.index');
-    //     }
-
-    //     return $this->render('pages/ingredient/edit.html.twig', [
-    //         'form' => $form->createView()
-    //     ]);
-    // }
-    
     /**
      * This controller allows us to delete an ingredient
      *
      * @param EntityManagerInterface $manager
-     * @param int $id
+     * @param Ingredient $ingredient
      * @return Response
      */
     #[Route('/ingredient/suppression/{id}', 'ingredient.delete', methods: ['GET'])]
+    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     public function delete(
-        IngredientRepository $repository,
-        int $id,
-        EntityManagerInterface $manager
+        EntityManagerInterface $manager,
+        Ingredient $ingredient
     ): Response {
-        $ingredient = $repository->findOneBy(["id" => $id]);
-
-        if (!$ingredient) {
-            $this->addFlash(
-                'success',
-                "L'ingrédient n'a pas été toruvé"
-            );
-
-            return $this->redirectToRoute('ingredient.index');
-        }
-        
         $manager->remove($ingredient);
         $manager->flush();
 
         $this->addFlash(
             'success',
-            'Votre ingrédient a été supprimer avec succès !'
+            'Votre ingrédient a été supprimé avec succès !'
         );
 
         return $this->redirectToRoute('ingredient.index');
     }
-
 }
