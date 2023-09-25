@@ -23,12 +23,12 @@ class IngredientController extends AbstractController
      * @return Response
      */
     #[Route('/ingredient', name: 'ingredient.index', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
     public function index(
         IngredientRepository $repository,
         PaginatorInterface $paginator,
         Request $request
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $ingredients = $paginator->paginate(
             $repository->findBy(['user' => $this->getUser()]),
             $request->query->getInt('page', 1),
@@ -47,12 +47,12 @@ class IngredientController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
-    #[IsGranted('ROLE_USER')]
     #[Route('/ingredient/creation', 'ingredient.new')]
     public function new(
         Request $request,
         EntityManagerInterface $manager
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $ingredient = new Ingredient();
         $form = $this->createForm(IngredientType::class, $ingredient);
 
@@ -85,33 +85,39 @@ class IngredientController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
-    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
     public function edit(
         Ingredient $ingredient,
         Request $request,
         EntityManagerInterface $manager
     ): Response {
-        $form = $this->createForm(IngredientType::class, $ingredient);
-        $form->handleRequest($request);
+        $isUserAllowed = $this->getUser() == $ingredient->getUser();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $ingredient = $form->getData();
+        if ($isUserAllowed) {
+            $this->denyAccessUnlessGranted('ROLE_USER');
+            $form = $this->createForm(IngredientType::class, $ingredient);
+            $form->handleRequest($request);
 
-            $manager->persist($ingredient);
-            $manager->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $ingredient = $form->getData();
 
-            $this->addFlash(
-                'success',
-                'Votre ingrédient a été modifié avec succès !'
-            );
+                $manager->persist($ingredient);
+                $manager->flush();
 
-            return $this->redirectToRoute('ingredient.index');
+                $this->addFlash(
+                    'success',
+                    'Votre ingrédient a été modifié avec succès !'
+                );
+
+                return $this->redirectToRoute('ingredient.index');
+            }
+
+            return $this->render('pages/ingredient/edit.html.twig', [
+                'form' => $form->createView()
+            ]);
         }
 
-        return $this->render('pages/ingredient/edit.html.twig', [
-            'form' => $form->createView()
-        ]);
+        return $this->redirectToRoute('security.login');
     }
 
     /**
@@ -122,19 +128,25 @@ class IngredientController extends AbstractController
      * @return Response
      */
     #[Route('/ingredient/suppression/{id}', 'ingredient.delete', methods: ['GET'])]
-    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     public function delete(
         EntityManagerInterface $manager,
         Ingredient $ingredient
     ): Response {
-        $manager->remove($ingredient);
-        $manager->flush();
+        $isUserAllowed = $this->getUser() == $ingredient->getUser();
 
-        $this->addFlash(
-            'success',
-            'Votre ingrédient a été supprimé avec succès !'
-        );
+        if ($isUserAllowed) {
+            $this->denyAccessUnlessGranted('ROLE_USER');
+            $manager->remove($ingredient);
+            $manager->flush();
 
-        return $this->redirectToRoute('ingredient.index');
+            $this->addFlash(
+                'success',
+                'Votre ingrédient a été supprimé avec succès !'
+            );
+
+            return $this->redirectToRoute('ingredient.index');
+        }
+
+        return $this->redirectToRoute('security.login');
     }
 }

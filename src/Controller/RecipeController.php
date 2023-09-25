@@ -5,30 +5,34 @@ namespace App\Controller;
 use App\Entity\Recipe;
 use App\Form\RecipeType;
 use App\Repository\RecipeRepository;
-use Knp\Component\Pager\PaginatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class RecipeController extends AbstractController
 {
     /**
-     * This function display all recipes
+     * This controller display all recipes
      *
      * @param RecipeRepository $repository
      * @param PaginatorInterface $paginator
      * @param Request $request
      * @return Response
      */
-    #[IsGranted('ROLE_USER')]
     #[Route('/recette', name: 'recipe.index', methods: ['GET'])]
     public function index(
         RecipeRepository $repository,
         PaginatorInterface $paginator,
         Request $request
     ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $recipes = $paginator->paginate(
             $repository->findBy(['user' => $this->getUser()]),
             $request->query->getInt('page', 1),
@@ -41,16 +45,16 @@ class RecipeController extends AbstractController
     }
 
     /**
-     * This controller show a form which create an recipe
+     * This controller allow us to create a new recipe
      *
      * @param Request $request
      * @param EntityManagerInterface $manager
      * @return Response
      */
-    #[IsGranted('ROLE_USER')]
     #[Route('/recette/creation', 'recipe.new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $manager):
-    Response {
+    public function new(Request $request, EntityManagerInterface $manager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $recipe = new Recipe();
         $form = $this->createForm(RecipeType::class, $recipe);
 
@@ -69,7 +73,6 @@ class RecipeController extends AbstractController
 
             return $this->redirectToRoute('recipe.index');
         }
-
 
         return $this->render('pages/recipe/new.html.twig', [
             'form' => $form->createView()
@@ -91,62 +94,65 @@ class RecipeController extends AbstractController
         Request $request,
         EntityManagerInterface $manager
     ): Response {
-        $form = $this->createForm(RecipeType::class, $recipe);
-        $form->handleRequest($request);
+        $isUserAllowed = $this->getUser() == $recipe->getUser();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $recipe = $form->getData();
+        if ($isUserAllowed) {
+            $this->denyAccessUnlessGranted('ROLE_USER');
 
-            $manager->persist($recipe);
+            $form = $this->createForm(RecipeType::class, $recipe);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $recipe = $form->getData();
+
+                $manager->persist($recipe);
+                $manager->flush();
+
+                $this->addFlash(
+                    'success',
+                    'Votre recette a été modifié avec succès !'
+                );
+
+                return $this->redirectToRoute('recipe.index');
+            }
+
+            return $this->render('pages/recipe/edit.html.twig', [
+                'form' => $form->createView()
+            ]);
+        } 
+
+        return $this->redirectToRoute('security.login');
+    }
+
+    /**
+     * This controller allow us to delete a recipe
+     *
+     * @param EntityManagerInterface $manager
+     * @param Recipe $recipe
+     * @return Response
+     */
+    #[Route('/recette/suppression/{id}', 'recipe.delete', methods: ['GET'])]
+    public function delete(
+        EntityManagerInterface $manager,
+        Recipe $recipe
+    ): Response {
+        $isUserAllowed = $this->getUser() == $recipe->getUser();
+
+        if ($isUserAllowed) {
+            $this->denyAccessUnlessGranted('ROLE_USER');
+
+            $manager->remove($recipe);
             $manager->flush();
 
             $this->addFlash(
                 'success',
-                'Votre recette a été modifié avec succès !'
+                'Votre recette a été supprimé avec succès !'
             );
 
             return $this->redirectToRoute('recipe.index');
-        }
+        } 
 
-        return $this->render('pages/recipe/edit.html.twig', [
-            'form' => $form->createView()
-        ]);
+        return $this->redirectToRoute('security.login');
     }
 
-
-    /**
-     * This controller allows us to delete a recipe
-     *
-     * @param EntityManagerInterface $manager
-     * @param int $id
-     * @return Response
-     */
-    #[Route('/recette/suppression/{id}', 'recipe.delete', methods: ['GET'])]
-    #[Security("is_granted('ROLE_USER') and user === recipe.getUser()")]
-    public function delete(
-        RecipeRepository $repository,
-        int $id,
-        EntityManagerInterface $manager
-    ): Response {
-        $recipe = $repository->findOneBy(["id" => $id]);
-
-        if (!$recipe) {
-            $this->addFlash(
-                'success',
-                "La recette n'a pas été trouvé"
-            );
-
-            return $this->redirectToRoute('recipe.index');
-        }
-        
-        $manager->remove($recipe);
-        $manager->flush();
-
-        $this->addFlash(
-            'success',
-            'Votre recette a été supprimer avec succès !'
-        );
-
-        return $this->redirectToRoute('recipe.index');
-    }
 }
